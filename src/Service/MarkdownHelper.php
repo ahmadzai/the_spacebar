@@ -26,6 +26,7 @@ class MarkdownHelper
     {
         if(stripos($source, 'bacon') !== false) {
             $this->logger->info("They are talking about meat");
+            //dump($this->logger); die;
         }
         $item = $this->cache->getItem('markdown_'.md5($source));
         if (!$item->isHit()) {
