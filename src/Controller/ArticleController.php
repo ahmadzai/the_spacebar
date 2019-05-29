@@ -2,9 +2,10 @@
 namespace App\Controller;
 
 use App\Entity\Article;
-use App\Service\MarkdownHelper;
+use App\Repository\ArticleRepository;
 use App\Service\SlackClient;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,32 +21,30 @@ class ArticleController extends AbstractController
     /**
   * @Route("/", name="app_homepage")
   */
-  public function homepage()
+  public function homepage(ArticleRepository $repository)
   {
 
-    return $this->render("article/homepage.html.twig");
+      $articles = $repository->findAllPublishedOrderByNewest();
+
+      return $this->render("article/homepage.html.twig",
+          [
+              'articles' => $articles,
+          ]);
 
   }
 
     /**
      * @Route("/news/{slug}", name="article_show")
-     * @param $slug
-     * @param MarkdownHelper $markdownHelper
+     * @param $article
      * @param SlackClient $slack
      * @return Response
      */
-  public function show($slug, MarkdownHelper $markdownHelper, SlackClient $slack, EntityManagerInterface $em)
+  public function show(Article $article, SlackClient $slack)
   {
 
-      if($slug === "wazir") {
+      if($article->getSlug() === "wazir") {
 
-          $slack->sendMessage($slug, "This message from Little Techie Dev");
-      }
-
-      $repository = $em->getRepository(Article::class);
-      $article = $repository->findOneBy(['slug'=>$slug]);
-      if (!$article) {
-          throw $this->createNotFoundException(sprintf("No article for slug %s", $slug));
+          $slack->sendMessage($article->getSlug(), "This message from Little Techie Dev");
       }
 
 
@@ -64,10 +63,15 @@ class ArticleController extends AbstractController
   /**
   * @Route("/news/{slug}/heart", name="article_toggle_heart", methods={"Post"})
   */
-  public function toggleArticleHeart($slug)
+  public function toggleArticleHeart(Article $article, LoggerInterface $logger, EntityManagerInterface $em)
   {
     //return new JsonResponse(['heart' => rand(5, 100)]);
-    return $this->json(['heart' => rand(5, 100)]);
+      $article->incrementHeartCount();
+      $em->flush();
+
+      $logger->info("Article is being hearted");
+
+      return $this->json(['heart' => $article->getHeartCount()]);
   }
 
 
