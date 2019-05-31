@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Article;
+use App\Entity\Comment;
 use Doctrine\Common\Persistence\ObjectManager;
 
 class ArticleFixtures extends BaseFixture
@@ -24,8 +25,7 @@ class ArticleFixtures extends BaseFixture
 
     public function loadData(ObjectManager $manager)
     {
-        $this->createMany(Article::class, 10, function (Article $article, $count)
-        {
+        $this->createMany(Article::class, 10, function (Article $article, $count) use ($manager) {
 
         $article->setTitle($this->faker->randomElement(self::$articleTitles))
             ->setContent(<<<EOF
