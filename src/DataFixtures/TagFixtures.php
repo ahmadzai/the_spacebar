@@ -10,8 +10,11 @@ class TagFixtures extends BaseFixture
 
     protected function loadData(ObjectManager $manager)
     {
-        $this->createMany(Tag::class, 10, function(Tag $tag) {
+        $this->createMany(10, 'fake-tags', function($count) {
+            $tag = new Tag();
             $tag->setName($this->faker->realText(20));
+
+            return $tag;
         });
         $manager->flush();
     }
