@@ -8,6 +8,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\ArticleRepository")
@@ -24,6 +26,7 @@ class Article
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank(message="Get creative and think of a title!")
      */
     private $title;
 
@@ -245,6 +248,25 @@ class Article
         $this->author = $author;
 
         return $this;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->publishedAt !== null;
+    }
+
+    /**
+     * @Assert\Callback()
+     * @param ExecutionContextInterface $context
+     * @param $payload
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+        if (stripos($this->getTitle(), 'fuck') !== false) {
+            $context->buildViolation('Um.. you can not use f..k word in title')
+                ->atPath('title')
+                ->addViolation();
+        }
     }
 
 }

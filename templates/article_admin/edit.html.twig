@@ -1,0 +1,10 @@
+{% extends 'content_base.html.twig' %}
+
+{% block body_content %}
+    <h1>Update the Article! ?</h1>
+    {{ include('article_admin/_form.html.twig', {
+        button_text: 'Update!'
+    }) }}
+
+{% endblock %}
+
